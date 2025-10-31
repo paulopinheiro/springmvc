@@ -5,7 +5,7 @@ import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Size;
 import org.springframework.stereotype.Component;
 
-@Component("user-validI")
+@Component("user-valid")
 public class UserModelValid {
     @NotEmpty(message="First Name should not be empty")
     @Size(min = 3, max = 20, message = "First Name should be between 3 and 20 characters" )

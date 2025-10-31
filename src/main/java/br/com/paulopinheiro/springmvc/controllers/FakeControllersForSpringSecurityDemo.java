@@ -16,6 +16,11 @@ public class FakeControllersForSpringSecurityDemo {
         return "admin";
     }
 
+    @RequestMapping("/manager")
+    public String manager() {
+        return "manager";
+    }
+
     @RequestMapping("/homepage")
     public String homepage() {
         return "homepage";

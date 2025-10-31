@@ -3,6 +3,8 @@ package br.com.paulopinheiro.springmvc;
 import br.com.paulopinheiro.springmvc.interceptors.DemoHandlerInterceptor;
 import br.com.paulopinheiro.springmvc.security.DefaultAuthenticationFailureHandler;
 import br.com.paulopinheiro.springmvc.security.DefaultSuccessLogoutHandler;
+import br.com.paulopinheiro.springmvc.security.DefaultUserDetailsService;
+import br.com.paulopinheiro.springmvc.security.SetupDataLoader;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.context.MessageSource;
@@ -15,11 +17,9 @@ import org.springframework.context.support.ResourceBundleMessageSource;
 import static org.springframework.security.config.Customizer.withDefaults;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
@@ -142,32 +142,64 @@ public class WebConfig implements WebMvcConfigurer {
 //				.addResolver(new PathResourceResolver()); 
 //	}
 
-    @Bean
-    public InMemoryUserDetailsManager userDetailsService() {
-        UserDetails user1 = User.withUsername("user1").password(passwordEncoder().encode("test1")).roles("CUSTOMER").build();
-        UserDetails user2 = User.withUsername("user2").password(passwordEncoder().encode("test2")).roles("CUSTOMER").build();
-        UserDetails admin = User.withUsername("admin").password(passwordEncoder().encode("root")).roles("ADMIN").build();
-
-        return new InMemoryUserDetailsManager(user1, user2, admin);
-    }
+//    @Bean
+//    public InMemoryUserDetailsManager userDetailsService() {
+//        UserDetails user1 = User.withUsername("user1").password(passwordEncoder().encode("test1")).roles("CUSTOMER").build();
+//        UserDetails user2 = User.withUsername("user2").password(passwordEncoder().encode("test2")).roles("CUSTOMER").build();
+//        UserDetails admin = User.withUsername("admin").password(passwordEncoder().encode("root")).roles("ADMIN").build();
+//
+//        return new InMemoryUserDetailsManager(user1, user2, admin);
+//    }
 
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
+//    @Bean
+//    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+//        http
+//                .authorizeHttpRequests(auth -> auth
+//                    .requestMatchers("/test/admin/**").hasRole("ADMIN")
+//                    .requestMatchers("/test/anonymous").anonymous()
+//                    .requestMatchers("/test/login_page").permitAll()
+//                    .anyRequest().authenticated()
+//                )
+////                .formLogin(withDefaults())
+//                .formLogin(form -> form
+//                    .loginPage("/test/login_page")
+//                    .loginProcessingUrl("/test/perform_login")
+//                    .defaultSuccessUrl("/test/homepage")
+//                    .failureUrl("/test/login_page?error=true")
+//                    .failureHandler(authenticationFailureHandler())
+//                )
+//                .logout(logout -> logout
+//                    .logoutUrl("/test/perform_logout")
+//                    .logoutSuccessUrl("/test/login_page")
+//                    .deleteCookies("JSESSIONID")
+//                    .logoutSuccessHandler(logoutSuccessHandler())
+//                )
+//                .httpBasic(withDefaults());
+//
+//        return http.build();
+//    }
+
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
+                .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
                     .requestMatchers("/test/admin/**").hasRole("ADMIN")
+                    .requestMatchers("/test/manager/**").hasAuthority(SetupDataLoader.WRITE_PRIVILEGE)
                     .requestMatchers("/test/anonymous").anonymous()
-                    .requestMatchers("/test/login_page").permitAll()
+                    .requestMatchers("/test/login_page*", 
+                                     "/test/user-registration-form-security-demo", 
+                                     "/test/create-user-security-demo").permitAll()
                     .anyRequest().authenticated()
                 )
 //                .formLogin(withDefaults())
                 .formLogin(form -> form
-                    .loginPage("/test/login_page")
+//                    .loginPage("/test/login_page")
                     .loginProcessingUrl("/test/perform_login")
                     .defaultSuccessUrl("/test/homepage")
                     .failureUrl("/test/login_page?error=true")
@@ -175,11 +207,11 @@ public class WebConfig implements WebMvcConfigurer {
                 )
                 .logout(logout -> logout
                     .logoutUrl("/test/perform_logout")
-                    .logoutSuccessUrl("/test/login_page")
                     .deleteCookies("JSESSIONID")
                     .logoutSuccessHandler(logoutSuccessHandler())
                 )
-                .httpBasic(withDefaults());
+                .httpBasic(withDefaults()
+                );
 
         return http.build();
     }
@@ -193,5 +225,10 @@ public class WebConfig implements WebMvcConfigurer {
     @Bean
     public LogoutSuccessHandler logoutSuccessHandler() {
         return new DefaultSuccessLogoutHandler();
+    }
+
+    @Bean
+    public UserDetailsService userDetailsService() {
+        return new DefaultUserDetailsService();
     }
 }
