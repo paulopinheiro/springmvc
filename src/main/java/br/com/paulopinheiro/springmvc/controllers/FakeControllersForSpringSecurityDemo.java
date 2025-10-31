@@ -1,7 +1,9 @@
 package br.com.paulopinheiro.springmvc.controllers;
 
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 @Controller
 @RequestMapping("/test")
@@ -24,5 +26,15 @@ public class FakeControllersForSpringSecurityDemo {
     @RequestMapping("/homepage")
     public String homepage() {
         return "homepage";
+    }
+
+    @RequestMapping("/delete-order")
+    @ResponseBody
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_MANAGER')")
+//    @PostAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_MANAGER')")
+//    @Secured({"ROLE_ADMIN","ROLE_MANAGER"})
+    public String deleteOrder() {
+        System.out.println("/// In deleteOrder method");
+        return "Order is Deleted";
     }
 }

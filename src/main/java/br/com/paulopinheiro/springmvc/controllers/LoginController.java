@@ -10,4 +10,9 @@ public class LoginController {
     public String login() {
         return "login";
     }
+
+    @RequestMapping("/login_remember_me")
+    public String loginRememberMe() {
+        return "login_remember_me";
+    }
 }

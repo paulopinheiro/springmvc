@@ -15,6 +15,7 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.context.annotation.PropertySources;
 import org.springframework.context.support.ResourceBundleMessageSource;
 import static org.springframework.security.config.Customizer.withDefaults;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -39,6 +40,7 @@ import org.springframework.web.servlet.view.JstlView;
 @EnableWebMvc
 @EnableWebSecurity
 @Configuration
+@EnableMethodSecurity(prePostEnabled=true, securedEnabled=true)
 @ComponentScan(basePackages = {"br.com.paulopinheiro.springmvc"})
 @PropertySources({
     @PropertySource("classpath:test.properties"),
@@ -192,23 +194,30 @@ public class WebConfig implements WebMvcConfigurer {
                     .requestMatchers("/test/admin/**").hasRole("ADMIN")
                     .requestMatchers("/test/manager/**").hasAuthority(SetupDataLoader.WRITE_PRIVILEGE)
                     .requestMatchers("/test/anonymous").anonymous()
-                    .requestMatchers("/test/login_page*", 
+                    .requestMatchers("/test/login_remember_me",
+                                     "/test/login_page*", 
                                      "/test/user-registration-form-security-demo", 
                                      "/test/create-user-security-demo").permitAll()
                     .anyRequest().authenticated()
                 )
 //                .formLogin(withDefaults())
                 .formLogin(form -> form
-//                    .loginPage("/test/login_page")
+                    .loginPage("/test/login_remember_me")
                     .loginProcessingUrl("/test/perform_login")
-                    .defaultSuccessUrl("/test/homepage")
+                    .defaultSuccessUrl("/test/homepage",false)
                     .failureUrl("/test/login_page?error=true")
                     .failureHandler(authenticationFailureHandler())
                 )
                 .logout(logout -> logout
                     .logoutUrl("/test/perform_logout")
                     .deleteCookies("JSESSIONID")
-                    .logoutSuccessHandler(logoutSuccessHandler())
+//                    .logoutSuccessHandler(logoutSuccessHandler())
+                    .logoutSuccessUrl("/test/login_remember_me")
+                )
+                .rememberMe(rememberMe -> rememberMe
+                    .key("superSecretKey")
+                    .rememberMeParameter("remember")
+                    .rememberMeCookieName("rememberLogin")
                 )
                 .httpBasic(withDefaults()
                 );
