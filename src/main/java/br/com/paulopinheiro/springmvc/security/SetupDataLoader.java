@@ -9,6 +9,7 @@ import br.com.paulopinheiro.springmvc.persistence.repositories.UserRepository;
 import jakarta.transaction.Transactional;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -75,7 +76,7 @@ public class SetupDataLoader implements ApplicationListener<ContextRefreshedEven
         Role role = roleRepository.findByName(name);
         if (Optional.ofNullable(role).isEmpty()) {
             role = new Role(name);
-            role.setPrivileges(privileges);
+            role.setPrivileges(new HashSet(privileges));
             roleRepository.save(role);
         }
         return role;
@@ -91,7 +92,7 @@ public class SetupDataLoader implements ApplicationListener<ContextRefreshedEven
             user.setLastName("Admin");
             user.setPassword(passwordEncoder.encode(password));
             user.setEmail(email);
-            user.setRoles(Arrays.asList(role));
+            user.setRoles(new HashSet(Arrays.asList(role)));
             user.setEnabled(true);
 
             userRepository.save(user);

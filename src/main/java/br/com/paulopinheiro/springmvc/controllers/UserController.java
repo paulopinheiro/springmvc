@@ -8,6 +8,7 @@ import br.com.paulopinheiro.springmvc.persistence.repositories.UserRepository;
 import br.com.paulopinheiro.springmvc.security.SetupDataLoader;
 import jakarta.validation.Valid;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -92,7 +93,7 @@ public class UserController {
         user.setPassword(passwordEncoder.encode(userModel.getPassword()));
         user.setEmail(userModel.getEmail());
         user.setEnabled(true);
-        user.setRoles(Arrays.asList(roleRepository.findByName(SetupDataLoader.ROLE_USER)));
+        user.setRoles(new HashSet(Arrays.asList(roleRepository.findByName(SetupDataLoader.ROLE_USER))));
         userRepository.save(user);
 
         return "redirect:/test/login_page";
