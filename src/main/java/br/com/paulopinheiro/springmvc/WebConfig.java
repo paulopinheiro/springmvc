@@ -8,6 +8,9 @@ import br.com.paulopinheiro.springmvc.security.DefaultUserDetailsService;
 import br.com.paulopinheiro.springmvc.security.SetupDataLoader;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import java.util.Properties;
+import javax.sql.DataSource;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -15,6 +18,13 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.context.annotation.PropertySources;
 import org.springframework.context.support.ResourceBundleMessageSource;
+import org.springframework.core.env.Environment;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.springframework.jdbc.datasource.DriverManagerDataSource;
+import org.springframework.orm.jpa.JpaTransactionManager;
+import org.springframework.orm.jpa.JpaVendorAdapter;
+import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
+import org.springframework.orm.jpa.vendor.EclipseLinkJpaVendorAdapter;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import static org.springframework.security.config.Customizer.withDefaults;
@@ -28,6 +38,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.web.servlet.HandlerExceptionResolver;
 import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.ModelAndView;
@@ -43,9 +54,12 @@ import org.springframework.web.servlet.view.JstlView;
 
 @EnableWebMvc
 @EnableWebSecurity
-@Configuration
 @EnableMethodSecurity(prePostEnabled=true, securedEnabled=true)
+@Configuration
 @ComponentScan(basePackages = {"br.com.paulopinheiro.springmvc"})
+@EnableTransactionManagement
+@EnableJpaRepositories("br.com.paulopinheiro.springmvc.persistence.repositories.springdata")
+@PropertySource("classpath:database.properties")
 @PropertySources({
     @PropertySource("classpath:test.properties"),
     @PropertySource("classpath:test2.properties")
@@ -257,5 +271,62 @@ public class WebConfig implements WebMvcConfigurer {
         authenticationManagerBuilder.authenticationProvider(authProvider());
 
         return authenticationManagerBuilder.build();
+    }
+
+    // ===== Spring Data JPA Configuration
+    private static final String PROPERTY_DRIVER = "driver";
+    private static final String PROPERTY_URL = "url";
+    private static final String PROPERTY_USERNAME = "user";
+    private static final String PROPERTY_PASSWORD = "password";
+
+    @Autowired private Environment environment;
+
+    @Bean
+    public DataSource dataSource() {
+        DriverManagerDataSource ds = new DriverManagerDataSource();
+
+        ds.setUrl(environment.getProperty(PROPERTY_URL));
+        ds.setUsername(environment.getProperty(PROPERTY_USERNAME));
+        ds.setPassword(environment.getProperty(PROPERTY_PASSWORD));
+        ds.setDriverClassName(environment.getProperty(PROPERTY_DRIVER));
+
+        return ds;
+    }
+
+    @Bean
+    public LocalContainerEntityManagerFactoryBean entityManagerFactory() {
+        LocalContainerEntityManagerFactoryBean lfb = new LocalContainerEntityManagerFactoryBean();
+
+        lfb.setDataSource(dataSource());
+        lfb.setPackagesToScan("br.com.paulopinheiro.springmvc.persistence.entities");
+        lfb.setJpaVendorAdapter(eclipseLinkAdapter());
+        lfb.setJpaProperties(eclipseLinkProperties());
+
+        return lfb;
+    }
+
+    private JpaVendorAdapter eclipseLinkAdapter() {
+        EclipseLinkJpaVendorAdapter eclipseLinkJpaVendorAdapter = new EclipseLinkJpaVendorAdapter();
+
+        eclipseLinkJpaVendorAdapter.setShowSql(true);
+
+        return eclipseLinkJpaVendorAdapter;
+    }
+
+    private Properties eclipseLinkProperties() {
+        Properties props = new Properties();
+
+        props.put("eclipselink.weaving", "false");
+
+        return props;
+    }
+
+    @Bean
+    public JpaTransactionManager transactionManager() {
+        JpaTransactionManager transactionManager = new JpaTransactionManager();
+
+        transactionManager.setEntityManagerFactory(entityManagerFactory().getObject());
+
+        return transactionManager;
     }
 }
