@@ -2,6 +2,7 @@ package br.com.paulopinheiro.springmvc;
 
 import br.com.paulopinheiro.springmvc.interceptors.DemoHandlerInterceptor;
 import br.com.paulopinheiro.springmvc.security.DefaultAuthenticationFailureHandler;
+import br.com.paulopinheiro.springmvc.security.DefaultAuthenticationProvider;
 import br.com.paulopinheiro.springmvc.security.DefaultSuccessLogoutHandler;
 import br.com.paulopinheiro.springmvc.security.DefaultUserDetailsService;
 import br.com.paulopinheiro.springmvc.security.SetupDataLoader;
@@ -14,7 +15,10 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.context.annotation.PropertySources;
 import org.springframework.context.support.ResourceBundleMessageSource;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.AuthenticationProvider;
 import static org.springframework.security.config.Customizer.withDefaults;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -167,7 +171,7 @@ public class WebConfig implements WebMvcConfigurer {
 //                    .requestMatchers("/test/login_page").permitAll()
 //                    .anyRequest().authenticated()
 //                )
-////                .formLogin(withDefaults())
+////                .formLogin(withDefaults()
 //                .formLogin(form -> form
 //                    .loginPage("/test/login_page")
 //                    .loginProcessingUrl("/test/perform_login")
@@ -239,5 +243,19 @@ public class WebConfig implements WebMvcConfigurer {
     @Bean
     public UserDetailsService userDetailsService() {
         return new DefaultUserDetailsService();
+    }
+
+    @Bean
+    public AuthenticationProvider authProvider() {
+        return new DefaultAuthenticationProvider();
+    }
+
+    @Bean
+    public AuthenticationManager authManager(HttpSecurity http) throws Exception {
+        AuthenticationManagerBuilder authenticationManagerBuilder = http.getSharedObject(AuthenticationManagerBuilder.class);
+
+        authenticationManagerBuilder.authenticationProvider(authProvider());
+
+        return authenticationManagerBuilder.build();
     }
 }
