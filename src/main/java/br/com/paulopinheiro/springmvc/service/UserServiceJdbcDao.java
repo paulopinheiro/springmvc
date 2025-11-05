@@ -44,8 +44,4 @@ public class UserServiceJdbcDao {
     public Integer createTestUser2() {
         return userDao.addSampleUserWithSimpleJdbcInsertDemo();
     }
-
-    public User getUserWithFirstLastNameById(Integer id) {
-        return userDao.getUserWithFirstLastNameByIdFromStoredProcedure(id);
-    }
 }

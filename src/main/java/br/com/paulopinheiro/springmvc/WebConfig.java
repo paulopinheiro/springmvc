@@ -291,6 +291,7 @@ public class WebConfig implements WebMvcConfigurer {
         ds.setUsername(environment.getProperty(PROPERTY_USERNAME));
         ds.setPassword(environment.getProperty(PROPERTY_PASSWORD));
         ds.setDriverClassName(environment.getProperty(PROPERTY_DRIVER));
+        ds.setSchema("APP");
 
         return ds;
     }
@@ -310,7 +311,7 @@ public class WebConfig implements WebMvcConfigurer {
     private JpaVendorAdapter eclipseLinkAdapter() {
         EclipseLinkJpaVendorAdapter eclipseLinkJpaVendorAdapter = new EclipseLinkJpaVendorAdapter();
 
-        eclipseLinkJpaVendorAdapter.setShowSql(true);
+        eclipseLinkJpaVendorAdapter.setShowSql(false);
 
         return eclipseLinkJpaVendorAdapter;
     }
