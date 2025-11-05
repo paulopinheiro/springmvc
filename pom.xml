@@ -12,6 +12,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <jakartaee>10.0.0</jakartaee>
         <spring.version>6.2.6</spring.version>
+        <aspectj.version>1.9.24</aspectj.version>
     </properties>
     
     <dependencies>
@@ -69,8 +70,20 @@
             <version>2.0.17</version>
             <type>jar</type>
         </dependency>
+
+        <dependency>
+            <groupId>org.aspectj</groupId>
+            <artifactId>aspectjrt</artifactId>
+            <version>${aspectj.version}</version>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.aspectj</groupId>
+            <artifactId>aspectjtools</artifactId>
+            <version>${aspectj.version}</version>
+        </dependency>
     </dependencies>
-    
+
     <build>
         <plugins>
             <plugin>
