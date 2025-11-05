@@ -12,6 +12,6 @@ public interface UserJpaRepository<U> extends CrudRepository<User, Long> {
     @Query("SELECT u FROM User u WHERE LOWER(u.firstName) = LOWER(:firstName)")
     List<User> getByFirstNameCaseInsensitive(@Param("firstName") String firstName);
 
-    @Query(value="SELECT * FROM user ORDER BY first_name", nativeQuery=true)
+    @Query(value="SELECT * FROM users ORDER BY firstname", nativeQuery=true)
     List<User> getAllUsersOrderByFirstName();
 }

@@ -1,5 +1,8 @@
 package br.com.paulopinheiro.springmvc;
 
+import br.com.paulopinheiro.springmvc.aop.DemoAop;
+import br.com.paulopinheiro.springmvc.aop.DemoAspect;
+import br.com.paulopinheiro.springmvc.aop.User;
 import br.com.paulopinheiro.springmvc.interceptors.DemoHandlerInterceptor;
 import br.com.paulopinheiro.springmvc.security.DefaultAuthenticationFailureHandler;
 import br.com.paulopinheiro.springmvc.security.DefaultAuthenticationProvider;
@@ -15,6 +18,7 @@ import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.FilterType;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.context.annotation.PropertySources;
 import org.springframework.context.support.ResourceBundleMessageSource;
@@ -58,7 +62,12 @@ import org.springframework.web.servlet.view.JstlView;
 @EnableWebSecurity
 @EnableMethodSecurity(prePostEnabled=true, securedEnabled=true)
 @Configuration
-@ComponentScan(basePackages = {"br.com.paulopinheiro.springmvc"})
+@ComponentScan(basePackages = {"br.com.paulopinheiro.springmvc"},
+                               excludeFilters = {@ComponentScan.Filter(type=FilterType.ASSIGNABLE_TYPE, 
+                                                                       value={DemoAop.class, 
+                                                                              DemoAspect.class, 
+                                                                              User.class})
+                                                })
 @EnableTransactionManagement
 @EnableJpaRepositories("br.com.paulopinheiro.springmvc.persistence.repositories.springdata")
 @PropertySource("classpath:database.properties")
